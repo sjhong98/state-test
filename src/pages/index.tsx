@@ -14,7 +14,7 @@ export default function Home() {
         <div className={btn} onClick={() => router.push('/recoil-todo')}>
           <p className={font}>Recoil</p>
         </div>
-        <div className={btn} onClick={() => router.push('/zustand')}>
+        <div className={btn} onClick={() => router.push('/zustand-tetris')}>
           <p className={font}>Zustand</p>
         </div>
       </div>
