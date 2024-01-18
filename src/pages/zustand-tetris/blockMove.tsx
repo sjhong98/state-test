@@ -1,21 +1,25 @@
-import { useCallback, useEffect, KeyboardEvent, useState } from "react";
+import { useEffect, useState } from "react";
 import { blockType } from ".";
-import { blockChangeStore, blockStore, sortedBlockStore, isMovingStore } from "./store";
+import { blockChangeStore, blockStore, sortedBlockStore, isMovingStore, curBlockStore, rotateCountStore } from "./store";
+import { IRotate, TRotate, SRotate, ZRotate, JRotate, LRotate, ORotate } from "./blocks";
 import _ from 'lodash';
 
 export function BlockMove() {
     const [keyDown, setKeyDown] = useState<string>("");
-    const [keyCount, setKeyCount] = useState<number>(0);
+    const [isKeyDown, setIsKeyDown] = useState<boolean>(false);
+    const rotateCount:number = rotateCountStore((state) => state.rotateCount);
+    const setRotateCount = rotateCountStore((state) => state.setRotateCount);
     const sortedBlock:number[] = sortedBlockStore((state) => state.sortedBlock);
     const blocks:blockType[] = blockStore((state) => state.blocks);
     const setSortedBlock = sortedBlockStore((state) => state.setSortedBlock);
     const setBlocks = blockStore((state) => state.setBlocks);
     const setBlockChange = blockChangeStore((state) => state.setBlockChange);
     const setIsMoving = isMovingStore((state) => state.setIsMoving);
+    const curBlock:string = curBlockStore((state) => state.curBlock);
 
     const handleKeyDown = (e: any) => {
         setKeyDown(e.key);
-        setKeyCount((prev) => prev+1);
+        setIsKeyDown(prev=>!prev);
         e.preventDefault();
     }
 
@@ -23,7 +27,6 @@ export function BlockMove() {
     // handleKeyDown이 실행되면 keyDown을 통해 useEffect로 함수 등록 갱신
 
     useEffect(() => {
-        console.log(keyDown);
         switch (keyDown) {
             case 'ArrowUp' :
                 break;
@@ -36,10 +39,13 @@ export function BlockMove() {
             case 'ArrowLeft' :
                 blockLeft();
                 break;
+            case ' ' :
+                blockRotate();
+                break;
             default :
                 break;
         }
-    }, [keyDown, keyCount])
+    }, [keyDown, isKeyDown])
 
     useEffect(() => {
         document.addEventListener('keydown', handleKeyDown);
@@ -66,7 +72,7 @@ export function BlockMove() {
         setIsMoving(true);
         setTimeout(() => {
             setIsMoving(false);
-        }, 300)
+        }, 2000)
     }
 
     // left move 시에는 오름차순 정렬
@@ -94,6 +100,7 @@ export function BlockMove() {
                             tempArr.push(tempNum+10);
                             setSortedBlock(tempArr);
                             freezeBoard();
+                            setIsKeyDown(prev=>!prev);
                         }
                     } else {setBlockChange(true);}
                 } else {setBlockChange(true);}
@@ -122,6 +129,7 @@ export function BlockMove() {
                             tempArr.push(tempNum+1);
                             setSortedBlock(tempArr);
                             freezeBoard();
+                            setIsKeyDown(prev=>!prev);
                         }
                     } 
                 } 
@@ -151,11 +159,70 @@ export function BlockMove() {
                             tempArr.push(tempNum-1);
                             setSortedBlock(tempArr);
                             freezeBoard();
+                            setIsKeyDown(prev=>!prev);
                         }
                     } 
                 }
             } 
         } 
+    }
+
+    const blockRotate = () => {
+        switch(curBlock) {
+            case 'i' :
+                rotate(IRotate);
+                break;
+            case 'j' :
+                rotate(JRotate);
+                break;
+            case 'l' :
+                rotate(LRotate);
+                break;
+            case 'o' :
+                rotate(ORotate);
+                break;
+            case 'z' :
+                rotate(ZRotate);
+                break;
+            case 's' :
+                rotate(SRotate);
+                break;
+            case 't' :
+                rotate(TRotate);
+                break;
+            default :
+                break;
+        }
+    } 
+
+    const rotate = (arr:Array<Array<number>>) => {
+        let rotateTemp:number[] = _.cloneDeep(sortedBlock);
+        let i = 0;
+
+        for(; i<4; i++) {
+            rotateTemp[i] = rotateTemp[i] + arr[rotateCount][i];
+        }
+
+        if(rotateCount === 3) 
+            setRotateCount(0);
+        else {
+            let temp = rotateCount + 1;
+            setRotateCount(temp);
+        }
+
+        let temp = _.cloneDeep(blocks);
+
+        for(i=0; i<4; i++) {
+                temp[sortedBlock[i]].active = false;
+        }
+        for(i=0; i<4; i++) {
+            if(rotateTemp[i]<200 && rotateTemp[i]>=0 && !temp[rotateTemp[i]].active) 
+                temp[rotateTemp[i]].active = true; 
+        }
+        if(i === 4) {
+            setBlocks(temp);
+            setSortedBlock(rotateTemp); 
+        }
     }
 
     return (

@@ -21,6 +21,15 @@ interface IsMovingType {
     setIsMoving: (payload:boolean) => void;
 }
 
+interface CurBlockType {
+    curBlock: string;
+    setCurBlock: (payload:string) => void;
+}
+
+interface rotateCountType {
+    rotateCount: number;
+    setRotateCount: (payload:number) => void;
+}
 
 export const sortedBlockStore = create<SortedBlockStoreType>((set) => ({
     sortedBlock: [],
@@ -42,4 +51,14 @@ export const blockStore = create<BlockStoreType>((set) => ({
 export const isMovingStore = create<IsMovingType>((set) => ({
     isMoving: false,
     setIsMoving: (payload:boolean) => set({isMoving: payload})
+}))
+
+export const curBlockStore = create<CurBlockType>((set) => ({
+    curBlock: "",
+    setCurBlock: (payload:string) => set({curBlock: payload})
+}))
+
+export const rotateCountStore = create<rotateCountType>((set) => ({
+    rotateCount: 0,
+    setRotateCount: (payload:number) => set({rotateCount: payload})
 }))
