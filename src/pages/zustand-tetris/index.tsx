@@ -3,7 +3,8 @@ import Board from "./board";
 export interface blockType {
     x: number,
     y: number,
-    active: boolean
+    active: boolean,
+    guide: boolean
 }
 
 export default function Home() {

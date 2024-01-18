@@ -110,6 +110,11 @@ export function BlockMove() {
 
     const blockRight = () => {
         let temp = _.cloneDeep(blocks);
+
+        for(let i=0; i<200; i++) {
+            temp[i].guide = false;
+        }
+
         if((sortedBlock[0]+1)%10!==0 && !temp[sortedBlock[0]+1].active) {
             temp[sortedBlock[0]].active = false;
             temp[sortedBlock[0]+1].active = true;
@@ -122,15 +127,20 @@ export function BlockMove() {
                     if((sortedBlock[3]+1)%10!==0 && !temp[sortedBlock[3]+1].active) {
                         temp[sortedBlock[3]].active = false;
                         temp[sortedBlock[3]+1].active = true;
-                        setBlocks(temp);
+
                         let tempArr:number[] = [];
                         for(let i=0; i<4; i++) {
                             let tempNum:number = sortedBlock[i];
+                            let rest = (tempNum+1)%10 ;
                             tempArr.push(tempNum+1);
                             setSortedBlock(tempArr);
                             freezeBoard();
                             setIsKeyDown(prev=>!prev);
+                            for(let j=0; j<20; j++) {
+                                temp[j*10 + rest].guide = true;
+                            }
                         }
+                        setBlocks(temp);
                     } 
                 } 
             }    
@@ -139,6 +149,10 @@ export function BlockMove() {
 
     const blockLeft = () => {
         let temp = _.cloneDeep(blocks);
+
+        for(let i=0; i<200; i++) {
+            temp[i].guide = false;
+        }
 
         if(sortedBlock[3]%10!==0 && !temp[sortedBlock[3]-1].active) {
             temp[sortedBlock[3]].active = false;
@@ -152,15 +166,19 @@ export function BlockMove() {
                     if(sortedBlock[0]%10!==0 && !temp[sortedBlock[0]-1].active) {
                         temp[sortedBlock[0]].active = false;
                         temp[sortedBlock[0]-1].active = true;
-                        setBlocks(temp);
                         let tempArr:number[] = [];
                         for(let i=0; i<4; i++) {
                             let tempNum:number = sortedBlock[i];
+                            let rest = (tempNum-1)%10 ;
                             tempArr.push(tempNum-1);
                             setSortedBlock(tempArr);
                             freezeBoard();
                             setIsKeyDown(prev=>!prev);
+                            for(let j=0; j<20; j++) {
+                                temp[j*10 + rest].guide = true;
+                            }
                         }
+                        setBlocks(temp);
                     } 
                 }
             } 
@@ -197,27 +215,33 @@ export function BlockMove() {
 
     const rotate = (arr:Array<Array<number>>) => {
         let rotateTemp:number[] = _.cloneDeep(sortedBlock);
+        let temp = _.cloneDeep(blocks);
         let i = 0;
 
-        for(; i<4; i++) {
+        for(; i<200; i++) {
+            temp[i].guide = false;
+        }
+        for(i=0; i<4; i++) {
             rotateTemp[i] = rotateTemp[i] + arr[rotateCount][i];
         }
-
         if(rotateCount === 3) 
             setRotateCount(0);
         else {
             let temp = rotateCount + 1;
             setRotateCount(temp);
         }
-
-        let temp = _.cloneDeep(blocks);
-
         for(i=0; i<4; i++) {
                 temp[sortedBlock[i]].active = false;
         }
         for(i=0; i<4; i++) {
             if(rotateTemp[i]<200 && rotateTemp[i]>=0 && !temp[rotateTemp[i]].active) 
                 temp[rotateTemp[i]].active = true; 
+        }
+        for(let k=0; k<4; k++) {
+            let rest = rotateTemp[k] % 10;
+            for(let v=0; v<20; v++) {
+                temp[v*10 + rest].guide = true;
+            }
         }
         if(i === 4) {
             setBlocks(temp);
