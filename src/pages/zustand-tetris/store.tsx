@@ -31,6 +31,11 @@ interface rotateCountType {
     setRotateCount: (payload:number) => void;
 }
 
+interface NextBlocksType {
+    nextBlock: Array<number[]>;
+    setNextBlock: (payload:Array<number[]>) => void;
+}
+
 export const sortedBlockStore = create<SortedBlockStoreType>((set) => ({
     sortedBlock: [],
     setSortedBlock: (payload:number[]) => set((state) => ({sortedBlock: payload}))
@@ -61,4 +66,9 @@ export const curBlockStore = create<CurBlockType>((set) => ({
 export const rotateCountStore = create<rotateCountType>((set) => ({
     rotateCount: 0,
     setRotateCount: (payload:number) => set({rotateCount: payload})
+}))
+
+export const nextBlocksStore = create<NextBlocksType>((set) => ({
+    nextBlock: [],
+    setNextBlock: (payload:Array<number[]>) => set({nextBlock: payload})
 }))

@@ -5,6 +5,7 @@ import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { useEffect, useState } from "react";
+import { blockType } from "../zustand-tetris";
 
 export default function TodoList(props: {tab:string}) {
     const [todoList, setTodoList] = useRecoilState(recoilAtom);

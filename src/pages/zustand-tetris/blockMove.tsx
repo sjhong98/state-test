@@ -229,7 +229,7 @@ export function BlockMove() {
         else {
             let temp = rotateCount + 1;
             setRotateCount(temp);
-        }
+        }    
         for(i=0; i<4; i++) {
                 temp[sortedBlock[i]].active = false;
         }
