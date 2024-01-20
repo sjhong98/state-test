@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { blockType } from ".";
 import { blockChangeStore, blockStore, sortedBlockStore, isMovingStore, curBlockStore, rotateCountStore } from "./store";
 import { IRotate, TRotate, SRotate, ZRotate, JRotate, LRotate, ORotate } from "./blocks";
 import _ from 'lodash';
 
-export function BlockMove() {
+export function BlockMove(props: {setShift:Dispatch<SetStateAction<number>>, hold:boolean}) {
     const [keyDown, setKeyDown] = useState<string>("");
     const [isKeyDown, setIsKeyDown] = useState<boolean>(false);
     const rotateCount:number = rotateCountStore((state) => state.rotateCount);
@@ -14,8 +14,10 @@ export function BlockMove() {
     const setSortedBlock = sortedBlockStore((state) => state.setSortedBlock);
     const setBlocks = blockStore((state) => state.setBlocks);
     const setBlockChange = blockChangeStore((state) => state.setBlockChange);
-    const setIsMoving = isMovingStore((state) => state.setIsMoving);
     const curBlock:string = curBlockStore((state) => state.curBlock);
+
+    // setInterval과 clearInterval이 반환하는 값은 NodeJS.Timeout
+    let intervalId: NodeJS.Timeout;
 
     const handleKeyDown = (e: any) => {
         setKeyDown(e.key);
@@ -42,6 +44,9 @@ export function BlockMove() {
             case ' ' :
                 blockRotate();
                 break;
+            case 'Shift' :
+                props.setShift(prev=>prev+1);
+                break;
             default :
                 break;
         }
@@ -52,60 +57,56 @@ export function BlockMove() {
     }, [])
 
     useEffect(() => {
-        // setInterval과 clearInterval이 반환하는 값은 NodeJS.Timeout
-        let intervalId: NodeJS.Timeout;
+        if(!props.hold) {
+            if(blocks.length !== 0) {
+                intervalId = setTimeout(() => {
+                    blockDown();
+                }, 500)
+            }
+            // setInterval이 중첩되어 동작하지 않도록 하기 위해서는 clearInterval 사용
+            // useEffect가 실행될 때마다 새로운 setInterval이 생성됨
+            // 따라서, clearInterval을 통해 정리해주어야 함.
 
-        if(blocks.length !== 0) {
-            intervalId = setTimeout(() => {
-                blockDown();
-            }, 500)
+            return () => {
+                clearInterval(intervalId);
+            };
         }
-        // setInterval이 중첩되어 동작하지 않도록 하기 위해서는 clearInterval 사용
-        // useEffect가 실행될 때마다 새로운 setInterval이 생성됨
-        // 따라서, clearInterval을 통해 정리해주어야 함.
-        return () => {
-            clearInterval(intervalId);
-        };
     }, [blocks])
 
-    const freezeBoard = () => {
-        setIsMoving(true);
-        setTimeout(() => {
-            setIsMoving(false);
-        }, 2000)
-    }
-
-    // left move 시에는 오름차순 정렬
-    // right, down move 시에는 내림차순 정렬
+    // shift keyDown시, 현재 동작 중인 timeout을 clear하고, 새로운 timeout 발생하지 않도록 함
+    useEffect(() => {
+        if(props.hold) {
+            clearTimeout(intervalId);
+        }
+    }, [props.hold])
 
     const blockDown = () => {
         // 얕은 복사가 문제였음. spread 사용해도 얕은 복사되어 같은 주소 참조함.
-        let temp = _.cloneDeep(blocks);
-        if(sortedBlock[0]+10<200 && !temp[sortedBlock[0]+10].active) {
-            temp[sortedBlock[0]].active = false;
-            temp[sortedBlock[0]+10].active = true;
-            if(sortedBlock[1]+10<200 && !temp[sortedBlock[1]+10].active) {
-                temp[sortedBlock[1]].active = false;
-                temp[sortedBlock[1]+10].active = true;
-                if(sortedBlock[2]+10<200 && !temp[sortedBlock[2]+10].active) {
-                    temp[sortedBlock[2]].active = false;
-                    temp[sortedBlock[2]+10].active = true;
-                    if(sortedBlock[3]+10<200 && !temp[sortedBlock[3]+10].active) {
-                        temp[sortedBlock[3]].active = false;
-                        temp[sortedBlock[3]+10].active = true;
-                        setBlocks(temp);
-                        let tempArr:number[] = [];
-                        for(let i=0; i<4; i++) {
-                            let tempNum:number = sortedBlock[i];
-                            tempArr.push(tempNum+10);
-                            setSortedBlock(tempArr);
-                            freezeBoard();
-                            setIsKeyDown(prev=>!prev);
-                        }
+            let temp = _.cloneDeep(blocks);
+            if(sortedBlock[0]+10<200 && !temp[sortedBlock[0]+10].active) {
+                temp[sortedBlock[0]].active = false;
+                temp[sortedBlock[0]+10].active = true;
+                if(sortedBlock[1]+10<200 && !temp[sortedBlock[1]+10].active) {
+                    temp[sortedBlock[1]].active = false;
+                    temp[sortedBlock[1]+10].active = true;
+                    if(sortedBlock[2]+10<200 && !temp[sortedBlock[2]+10].active) {
+                        temp[sortedBlock[2]].active = false;
+                        temp[sortedBlock[2]+10].active = true;
+                        if(sortedBlock[3]+10<200 && !temp[sortedBlock[3]+10].active) {
+                            temp[sortedBlock[3]].active = false;
+                            temp[sortedBlock[3]+10].active = true;
+                            setBlocks(temp);
+                            let tempArr:number[] = [];
+                            for(let i=0; i<4; i++) {
+                                let tempNum:number = sortedBlock[i];
+                                tempArr.push(tempNum+10);
+                                setSortedBlock(tempArr);
+                                setIsKeyDown(prev=>!prev);
+                            }
+                        } else {setBlockChange(true);}
                     } else {setBlockChange(true);}
-                } else {setBlockChange(true);}
-            } else {setBlockChange(true);}     // 여기서 탈출하는 애들이 문제. 한번 변한 temp가 반영이 되어버림
-        } else {setBlockChange(true);}
+                } else {setBlockChange(true);}     // 여기서 탈출하는 애들이 문제. 한번 변한 temp가 반영이 되어버림
+            } else {setBlockChange(true);}
     }
 
     const blockRight = () => {
@@ -134,7 +135,6 @@ export function BlockMove() {
                             let rest = (tempNum+1)%10 ;
                             tempArr.push(tempNum+1);
                             setSortedBlock(tempArr);
-                            freezeBoard();
                             setIsKeyDown(prev=>!prev);
                             for(let j=0; j<20; j++) {
                                 temp[j*10 + rest].guide = true;
@@ -172,7 +172,6 @@ export function BlockMove() {
                             let rest = (tempNum-1)%10 ;
                             tempArr.push(tempNum-1);
                             setSortedBlock(tempArr);
-                            freezeBoard();
                             setIsKeyDown(prev=>!prev);
                             for(let j=0; j<20; j++) {
                                 temp[j*10 + rest].guide = true;

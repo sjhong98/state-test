@@ -1,0 +1,19 @@
+@font-face {
+    font-family: "dimit";
+    src: url('/src/assets/fonts/dimitri.TTF') format('truetype');
+  }
+  
+  @font-face {
+    font-family: 'block';
+    src: url('/public/blocked.ttf') format('truetype');
+  }
+  
+  @font-face {
+    font-family: 'rust';
+    src: url('/src/assets/fonts/Rust.ttf') format('truetype');
+  }
+  
+  @font-face {
+    font-family: 'lemon';
+    src: url('/src/assets/fonts/LEMONMILK-Light.otf');
+  }

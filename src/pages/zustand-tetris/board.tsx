@@ -9,10 +9,14 @@ import { BlockMove } from "./blockMove";
 import _ from 'lodash';
 
 export default function Board() {
+    const [randomArr, setRandomArr] = useState<number[]>([]);
+    const [shift, setShift] = useState<number>(0);
+    const [hold, setHold] = useState<boolean>(false);
+
     const nextBlocks = nextBlocksStore((state) => state.nextBlock);
     const setNextBlocks = nextBlocksStore((state) => state.setNextBlock);
-    const [randomArr, setRandomArr] = useState<number[]>([]);
     const setSortedBlock = sortedBlockStore((state) => state.setSortedBlock);
+    const sortedBlock = sortedBlockStore((state) => state.sortedBlock);
     const blocks:blockType[] = blockStore((state) => state.blocks);
     const setBlocks = blockStore((state) => state.setBlocks);
     const blockChange:boolean = blockChangeStore((state) => state.blockChange);
@@ -20,10 +24,9 @@ export default function Board() {
     const setCurBlock = curBlockStore((state) => state.setCurBlock);
     const setRotateCount = rotateCountStore((state) => state.setRotateCount);
 
-    const blockStyle = "bg-gray-800 rounded-sm center w-[2.2vw] h-[2.2vw]";
-    const blockFilledStyle = "bg-white rounded-sm center w-[2.2vw] h-[2.2vw]";
-    const blockGuide = "bg-gray-700 rounded-sm center w-[2.2vw] h-[2.2vw]";
-    const insideBlock = "w-[82%] h-[82%] bg-gray-200 rounded-sm center";
+    const blockStyle = "bg-gray-800 rounded-sm center w-[2vw] h-[2vw]";
+    const blockFilledStyle = "bg-white rounded-sm center w-[2vw] h-[2vw]";
+    const blockGuide = "bg-gray-700 rounded-sm center w-[2vw] h-[2vw]";
 
     const randomBlockSelection = [IBlock, ZBlock, SBlock, LBlock, JBlock, OBlock, TBlock];
 
@@ -157,6 +160,19 @@ export default function Board() {
         }
     }, [blockChange])
 
+    useEffect(() => {
+        if(shift !== 0) {
+            let temp = _.cloneDeep(blocks);
+            for(let i=0; i<4; i++) {
+                temp[sortedBlock[i]].active = false;
+            }
+            setHold(true);
+            setTimeout(() => {
+                setBlocks(temp);
+            }, 500);
+        }
+    }, [shift])
+
     return (
         <div className="grid grid-cols-10 grid-rows-20 gap-x-1 gap-y-1 w-auto h-auto" >
             { blocks.map((item:blockType, index:number) => {
@@ -165,8 +181,9 @@ export default function Board() {
                     </div>
                 )
             })}   
-            <BlockMove />
+            <BlockMove setShift={setShift} hold={hold} />
         </div>
  
  )
 }
+

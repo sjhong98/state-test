@@ -8,8 +8,8 @@ export default function NextBlocks() {
     const nextBlocks = nextBlocksStore((state) => state.nextBlock);
     const [filled, setFilled] = useState<boolean[]>([]);
 
-    const blockStyle = "rounded-sm center w-[1.8vw] h-[1.8vw]";
-    const blockFilledStyle = "bg-white rounded-sm center w-[1.8vw] h-[1.8vw]";
+    const blockStyle = "rounded-sm center w-[2vw] h-[2vw]";
+    const blockFilledStyle = "bg-white rounded-sm center w-[2vw] h-[2vw]";
 
     const [blocks, setBlocks] = useState<number[]>([]);
 
@@ -29,7 +29,8 @@ export default function NextBlocks() {
         console.log(nb1, nb2);
 
         if(nb1 !== undefined) {
-            nb2 = nb2.map((item) => item+50);
+            nb1 = nb1.map((item) => item-2)
+            nb2 = nb2.map((item) => item+48);
             for(let i=0; i<4; i++) {
                 tempFilled[nb1[i]] = true;
                 tempFilled[nb2[i]] = true;
@@ -40,7 +41,7 @@ export default function NextBlocks() {
     }, [nextBlocks])
     
     return (
-        <div className="grid grid-cols-10 grid-rows-9 w-[32vh] h-[29vh] mt-12">
+        <div className="grid grid-cols-10 grid-rows-9 gap-y-1 gap-x-10 w-auto h-auto mt-4">
             { blocks.map((item:number, index:number) => {
                 return (
                     <div key={index} className={filled[index] ? blockFilledStyle : blockStyle}>

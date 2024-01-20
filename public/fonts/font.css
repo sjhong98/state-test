@@ -1,0 +1,24 @@
+@font-face {
+    font-family: "dimit";
+    src: url('dimitri.TTF') format('truetype');
+  }
+  
+  @font-face {
+    font-family: 'block';
+    src: url('blocked.ttf') format('truetype');
+  }
+  
+  @font-face {
+    font-family: 'rust';
+    src: url('Rust.ttf') format('truetype');
+  }
+  
+  @font-face {
+    font-family: 'lemon';
+    src: url('LEMONMILK-Light.otf');
+  }
+
+  @font-face {
+    font-family: 'inlander';
+    src: url('Inlanders\ Demo.otf');
+  }
