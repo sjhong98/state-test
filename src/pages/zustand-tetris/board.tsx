@@ -4,7 +4,7 @@ import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { HoldType, blockType } from ".";
 import { IBlock, ZBlock, SBlock, JBlock, LBlock, OBlock, TBlock } from "./blocks";
 import React from 'react';
-import { blockChangeStore, blockStore, curBlockStore, isMovingStore, nextBlocksStore, rotateCountStore, sortedBlockStore } from "./store";
+import { blockChangeStore, blockStore, curBlockStore, isMovingStore, nextBlocksStore, prevTimeStore, rotateCountStore, sortedBlockStore, timeStore } from "./store";
 import { BlockMove } from "./blockMove";
 import _ from 'lodash';
 import styled from "styled-components";
@@ -35,6 +35,9 @@ export default function Board(props: PropsType) {
     const setCurBlock = curBlockStore((state) => state.setCurBlock);
     const curBlock:string = curBlockStore((state) => state.curBlock);
     const setRotateCount = rotateCountStore((state) => state.setRotateCount);
+    const time:number = timeStore((state) => state.time);
+    const setTime = timeStore((state) => state.setTime);
+    const prevTime = prevTimeStore((state) => state.prevTime);
 
     const blockStyle = "bg-gray-800 rounded-sm center w-[2vw] h-[2vw]";
     const blockFilledStyle = "bg-white rounded-sm center w-[2vw] h-[2vw]";
@@ -75,6 +78,7 @@ export default function Board(props: PropsType) {
     useEffect(() => {
         let temp = _.cloneDeep(blocks);
         let lines = 0;
+        let tempPrevTime = prevTime;
 
         // 채워진 row 제거
         if(blocks.length !== 0) {
@@ -194,6 +198,7 @@ export default function Board(props: PropsType) {
                 setBlocks(temp);
                 setBlockChange(false);
                 setRotateCount(0); 
+                setTime(prevTime);
                 if(shift !== 1)
                     setMaxHold(false);
             }

@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { blockType } from ".";
-import { blockChangeStore, blockStore, sortedBlockStore, isMovingStore, curBlockStore, rotateCountStore } from "./store";
+import { blockChangeStore, blockStore, sortedBlockStore, isMovingStore, curBlockStore, rotateCountStore, timeStore, prevTimeStore } from "./store";
 import { IRotate, TRotate, SRotate, ZRotate, JRotate, LRotate, ORotate } from "./blocks";
 import _ from 'lodash';
 import styled from "styled-components";
@@ -24,6 +24,9 @@ export function BlockMove(props: PropsType) {
     const setBlocks = blockStore((state) => state.setBlocks);
     const setBlockChange = blockChangeStore((state) => state.setBlockChange);
     const curBlock:string = curBlockStore((state) => state.curBlock);
+    const time:number = timeStore((state) => state.time);
+    const setTime = timeStore((state) => state.setTime);
+    const setPrevTime = prevTimeStore((state) => state.setPrevTime);
 
     const hold = props.hold;
     const setHold = props.setHold;
@@ -62,6 +65,12 @@ export function BlockMove(props: PropsType) {
             case 'Enter' :
                 if(!props.gameOver)
                     setHold(prev=>!prev);
+                break;
+            case 'Alt' :
+                setPrevTime(time);
+                clearTimeout(intervalId);
+                setTime(10);
+                break;
             default :
                 break;
         }
@@ -76,7 +85,7 @@ export function BlockMove(props: PropsType) {
             if(blocks.length !== 0) {
                 intervalId = setTimeout(() => {
                     blockDown();
-                }, 500)
+                }, time)
             }
             // setInterval이 중첩되어 동작하지 않도록 하기 위해서는 clearInterval 사용
             // useEffect가 실행될 때마다 새로운 setInterval이 생성됨
@@ -100,6 +109,7 @@ export function BlockMove(props: PropsType) {
     const blockDown = () => {
         // 얕은 복사가 문제였음. spread 사용해도 얕은 복사되어 같은 주소 참조함.
             let temp = _.cloneDeep(blocks);
+            let prevTime = time;
             if(sortedBlock[0]+10<200 && !temp[sortedBlock[0]+10].active) {
                 temp[sortedBlock[0]].active = false;
                 temp[sortedBlock[0]+10].active = true;
@@ -122,7 +132,7 @@ export function BlockMove(props: PropsType) {
                             }
                         } else {setBlockChange(true);}
                     } else {setBlockChange(true);}
-                } else {setBlockChange(true);}     // 여기서 탈출하는 애들이 문제. 한번 변한 temp가 반영이 되어버림
+                } else {setBlockChange(true);}    
             } else {setBlockChange(true);}
     }
 

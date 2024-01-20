@@ -36,6 +36,16 @@ interface NextBlocksType {
     setNextBlock: (payload:Array<number[]>) => void;
 }
 
+interface TimeType {
+    time: number;
+    setTime: (payload:number) => void;
+}
+
+interface PrevTimeType {
+    prevTime: number;
+    setPrevTime: (payload:number) => void;
+}
+
 export const sortedBlockStore = create<SortedBlockStoreType>((set) => ({
     sortedBlock: [],
     setSortedBlock: (payload:number[]) => set((state) => ({sortedBlock: payload}))
@@ -71,4 +81,14 @@ export const rotateCountStore = create<rotateCountType>((set) => ({
 export const nextBlocksStore = create<NextBlocksType>((set) => ({
     nextBlock: [],
     setNextBlock: (payload:Array<number[]>) => set({nextBlock: payload})
+}))
+
+export const timeStore = create<TimeType>((set) => ({
+    time: 800,
+    setTime: (payload:number) => set({time: payload})
+}))
+
+export const prevTimeStore = create<PrevTimeType>((set) => ({
+    prevTime: 800,
+    setPrevTime: (payload:number) => set({prevTime: payload})
 }))
