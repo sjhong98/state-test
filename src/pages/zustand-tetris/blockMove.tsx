@@ -3,10 +3,19 @@ import { blockType } from ".";
 import { blockChangeStore, blockStore, sortedBlockStore, isMovingStore, curBlockStore, rotateCountStore } from "./store";
 import { IRotate, TRotate, SRotate, ZRotate, JRotate, LRotate, ORotate } from "./blocks";
 import _ from 'lodash';
+import styled from "styled-components";
 
-export function BlockMove(props: {setShift:Dispatch<SetStateAction<number>>, hold:boolean}) {
+interface PropsType {
+    setShift: Dispatch<SetStateAction<number>>
+    hold: boolean,
+    setHold: Dispatch<SetStateAction<boolean>>,
+    gameOver: boolean
+}
+
+export function BlockMove(props: PropsType) {
     const [keyDown, setKeyDown] = useState<string>("");
     const [isKeyDown, setIsKeyDown] = useState<boolean>(false);
+
     const rotateCount:number = rotateCountStore((state) => state.rotateCount);
     const setRotateCount = rotateCountStore((state) => state.setRotateCount);
     const sortedBlock:number[] = sortedBlockStore((state) => state.sortedBlock);
@@ -15,6 +24,9 @@ export function BlockMove(props: {setShift:Dispatch<SetStateAction<number>>, hol
     const setBlocks = blockStore((state) => state.setBlocks);
     const setBlockChange = blockChangeStore((state) => state.setBlockChange);
     const curBlock:string = curBlockStore((state) => state.curBlock);
+
+    const hold = props.hold;
+    const setHold = props.setHold;
 
     // setInterval과 clearInterval이 반환하는 값은 NodeJS.Timeout
     let intervalId: NodeJS.Timeout;
@@ -47,6 +59,9 @@ export function BlockMove(props: {setShift:Dispatch<SetStateAction<number>>, hol
             case 'Shift' :
                 props.setShift(prev=>prev+1);
                 break;
+            case 'Enter' :
+                if(!props.gameOver)
+                    setHold(prev=>!prev);
             default :
                 break;
         }
@@ -57,7 +72,7 @@ export function BlockMove(props: {setShift:Dispatch<SetStateAction<number>>, hol
     }, [])
 
     useEffect(() => {
-        if(!props.hold) {
+        if(!hold) {
             if(blocks.length !== 0) {
                 intervalId = setTimeout(() => {
                     blockDown();
@@ -75,10 +90,12 @@ export function BlockMove(props: {setShift:Dispatch<SetStateAction<number>>, hol
 
     // shift keyDown시, 현재 동작 중인 timeout을 clear하고, 새로운 timeout 발생하지 않도록 함
     useEffect(() => {
-        if(props.hold) {
+        if(hold) {
             clearTimeout(intervalId);
+        } else {
+            blockDown();
         }
-    }, [props.hold])
+    }, [hold])
 
     const blockDown = () => {
         // 얕은 복사가 문제였음. spread 사용해도 얕은 복사되어 같은 주소 참조함.
@@ -216,13 +233,31 @@ export function BlockMove(props: {setShift:Dispatch<SetStateAction<number>>, hol
         let rotateTemp:number[] = _.cloneDeep(sortedBlock);
         let temp = _.cloneDeep(blocks);
         let i = 0;
+        let moveLeft = 0;
+        let moveRight = 0;
 
         for(; i<200; i++) {
             temp[i].guide = false;
         }
+        
+        for(i=0; i<4; i++) {
+            if(rotateTemp[i]%10===9 || rotateTemp[i]%10===8 || rotateTemp[i]%10===7 ) {
+                if((rotateTemp[i]+arr[rotateCount][i])%10===0 || (rotateTemp[i]+arr[rotateCount][i])%10===1 || (rotateTemp[i]+arr[rotateCount][i])%10===2)
+                moveLeft++;
+            }
+            if(rotateTemp[i]%10===0 && (rotateTemp[i]+arr[rotateCount][i])%10===9) {
+                moveRight++;
+            }
+        }
         for(i=0; i<4; i++) {
             rotateTemp[i] = rotateTemp[i] + arr[rotateCount][i];
         }
+        if(moveLeft !== 0) 
+            for(i=0; i<4; i++)
+                rotateTemp[i] -= moveLeft;
+        else if(moveRight !== 0) 
+            for(i=0; i<4; i++) 
+                rotateTemp[i] += moveRight;
         if(rotateCount === 3) 
             setRotateCount(0);
         else {
@@ -239,7 +274,8 @@ export function BlockMove(props: {setShift:Dispatch<SetStateAction<number>>, hol
         for(let k=0; k<4; k++) {
             let rest = rotateTemp[k] % 10;
             for(let v=0; v<20; v++) {
-                temp[v*10 + rest].guide = true;
+                if(temp[v*10 + rest] !== undefined)
+                    temp[v*10 + rest].guide = true;
             }
         }
         if(i === 4) {

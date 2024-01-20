@@ -26,7 +26,6 @@ export default function NextBlocks() {
         let nb1 = nextBlocks[0];
         let nb2 = nextBlocks[1];
 
-        console.log(nb1, nb2);
 
         if(nb1 !== undefined) {
             nb1 = nb1.map((item) => item-2)
